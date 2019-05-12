@@ -19,7 +19,7 @@ while True:
         else:
             set_decimal(2, 0)
             set_decimal(4, 0)
-        write_string(t.strftime('%H%M%S'), kerning=False)
+        write_string(t.strftime("%H%M%S"), kerning=False)
     else:
         total_distance = "{:6.0f}".format(st.get_total_distance())
         write_string(total_distance, kerning=False)
