@@ -1,11 +1,9 @@
-
 import stravalib
 import time
 import config as c
 
 
 class Strava(object):
-
     def __init__(self):
         self.client_id = c.get_setting(c.SECTION_SETTINGS, c.CLIENT_ID)
         self.client_secret = c.get_setting(c.SECTION_SETTINGS, c.CLIENT_SECRET)
@@ -21,7 +19,9 @@ class Strava(object):
 
     def check_token(self):
         if time.time() > self.expires_at:
-            self.access_token = self.sc.refresh_access_token(self.client_id, self.client_secret, self.refresh_token)
+            self.access_token = self.sc.refresh_access_token(
+                self.client_id, self.client_secret, self.refresh_token
+            )
             c.update_setting(c.SECTION_SETTINGS, c.ACCESS_TOKEN, str(self.access_token))
 
     def get_athlete(self):
@@ -30,26 +30,52 @@ class Strava(object):
         return athlete
 
     def get_activities(self):
-        self.check_token()
-        for activity in self.sc.get_activities(after="2019-03-05 22:25:41+00:00"):
-            print("{0.name} {0.moving_time} {0.distance} {0.start_date}".format(activity))
+        try:
+            self.check_token()
+            for activity in self.sc.get_activities(after="2019-03-05 22:25:41+00:00"):
+                print(
+                    "{0.name} {0.moving_time} {0.distance} {0.start_date}".format(
+                        activity
+                    )
+                )
+        except Exception as x:
+            print(x)
 
     def get_total_distance(self):
-        if time.time() > self.start_time:
-            self.start_time = time.time() + 900
-            self.check_token()
-            if self.total_meters == 0:
-                for activity in self.sc.get_activities():
-                    self.total_meters += float(stravalib.unithelper.miles(activity.distance))
-                    if (self.last_activity_date is None) or (activity.start_date > self.last_activity_date):
-                        self.last_activity_date = activity.start_date
-                    print("First Run: {0.name} {0.moving_time} {0.distance} {0.start_date}".format(activity))
+        try:
+            if time.time() > self.start_time:
+                self.start_time = time.time() + 900
+                self.check_token()
+                if self.total_meters == 0:
+                    for activity in self.sc.get_activities():
+                        self.total_meters += float(
+                            stravalib.unithelper.miles(activity.distance)
+                        )
+                        if (self.last_activity_date is None) or (
+                            activity.start_date > self.last_activity_date
+                        ):
+                            self.last_activity_date = activity.start_date
+                        print(
+                            "First Run: {0.name} {0.moving_time} {0.distance} {0.start_date}".format(
+                                activity
+                            )
+                        )
 
-            for activity in self.sc.get_activities(after=self.last_activity_date):
-                self.total_meters += float(stravalib.unithelper.miles(activity.distance))
-                if (self.last_activity_date is None) or (activity.start_date > self.last_activity_date):
-                    self.last_activity_date = activity.start_date
-                print("Second Run: {0.name} {0.moving_time} {0.distance} {0.start_date}".format(activity))
+                for activity in self.sc.get_activities(after=self.last_activity_date):
+                    self.total_meters += float(
+                        stravalib.unithelper.miles(activity.distance)
+                    )
+                    if (self.last_activity_date is None) or (
+                        activity.start_date > self.last_activity_date
+                    ):
+                        self.last_activity_date = activity.start_date
+                    print(
+                        "Second Run: {0.name} {0.moving_time} {0.distance} {0.start_date}".format(
+                            activity
+                        )
+                    )
+        except Exception as x:
+            print(x)
         return self.total_meters
 
 
